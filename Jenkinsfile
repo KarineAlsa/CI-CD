@@ -18,6 +18,16 @@ pipeline {
                 script {
                     docker.image(DOCKER_IMAGE).inside('-u root') {
                         sh 'npm install --unsafe-perm'
+                        sh '''
+                        echo "Node.js version:"
+                        node -v
+                        echo "npm version:"
+                        npm -v
+                        echo "Installed packages:"
+                        ls -la node_modules
+                        echo "es-errors package:"
+                        ls -la node_modules/es-errors
+                        '''
                         sh 'npm test'
                     }
                 }
