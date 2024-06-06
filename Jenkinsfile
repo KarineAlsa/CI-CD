@@ -16,8 +16,8 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    docker.image(DOCKER_IMAGE).inside {
-                        sh 'npm install'
+                    docker.image(DOCKER_IMAGE).inside('-u root') {
+                        sh 'npm install --unsafe-perm'
                         sh 'npm test'
                     }
                 }
@@ -26,7 +26,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    docker.image(DOCKER_IMAGE).run('-d -p 3000:3000')
+                    docker.image(DOCKER_IMAGE).run('-d -p 3003:3000')
                 }
             }
         }
