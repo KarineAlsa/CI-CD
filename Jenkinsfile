@@ -10,6 +10,8 @@ pipeline {
             steps {
                 script {
                     docker.build(DOCKER_IMAGE)
+                    sh 'rm -rf node_modules package-lock.json'
+                    
                 }
             }
         }
