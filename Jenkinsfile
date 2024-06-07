@@ -18,19 +18,29 @@ pipeline {
             steps {
                 script {
                     docker.image(DOCKER_IMAGE).inside('-u root') {
-                        sh 'rm -rf node_modules package-lock.json'
+                        
                         sh 'npm install --unsafe-perm'
-                        sh '''
-                        echo "Node.js version:"
-                        node -v
-                        echo "npm version:"
-                        npm -v
-                        echo "Installed packages:"
-                        ls -la node_modules
-                        echo "es-errors package:"
-                        ls -la node_modules/es-errors
-                        '''
                         sh 'npm test'
+                    }
+                }
+            }
+        }
+        stage('Stop and remove Docker container') {
+            steps {
+                script {
+                    def PORT = 3000
+                    def CONTAINER_ID = sh(
+                        script: "docker ps -q --filter 'expose=${PORT}/tcp'",
+                        returnStdout: true
+                    ).trim()
+                    
+                    if (CONTAINER_ID) {
+                        echo "Stopping container using port $PORT..."
+                        sh "docker stop $CONTAINER_ID"
+                        echo "Removing container using port $PORT..."
+                        sh "docker rm $CONTAINER_ID"
+                    } else {
+                        echo "No container found using port $PORT."
                     }
                 }
             }
@@ -38,7 +48,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    docker.image(DOCKER_IMAGE).run('-d -p 3003:3000')
+                    docker.image(DOCKER_IMAGE).run('-d -p 3000:3000')
                 }
             }
         }
